@@ -1,0 +1,7 @@
+target/
+Temp/
+gradle/
+build.gradle
+gradlew
+gradlew.bat
+
