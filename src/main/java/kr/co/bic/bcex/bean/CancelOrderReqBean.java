@@ -3,13 +3,13 @@ package kr.co.bic.bcex.bean;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-public class TokenPriceReqBean extends BeanBasic implements BcexSignedReqBeanInterface {
+public class CancelOrderReqBean extends BeanBasic implements BcexSignedReqBeanInterface {
 	
 	private String api_key;
-	private String market;
-	private String token;
 	
-	@JsonInclude(Include.NON_NULL)
+	String order_nos;
+	
+	@JsonInclude(Include.NON_EMPTY)
 	private String sign;
 
 	public String getApi_key() {
@@ -20,20 +20,12 @@ public class TokenPriceReqBean extends BeanBasic implements BcexSignedReqBeanInt
 		this.api_key = api_key;
 	}
 
-	public String getMarket() {
-		return market;
+	public String getOrder_nos() {
+		return order_nos;
 	}
 
-	public void setMarket(String market) {
-		this.market = market;
-	}
-
-	public String getToken() {
-		return token;
-	}
-
-	public void setToken(String token) {
-		this.token = token;
+	public void setOrder_nos(String order_nos) {
+		this.order_nos = order_nos;
 	}
 
 	public String getSign() {
@@ -43,5 +35,4 @@ public class TokenPriceReqBean extends BeanBasic implements BcexSignedReqBeanInt
 	public void setSign(String sign) {
 		this.sign = sign;
 	}
-	
 }

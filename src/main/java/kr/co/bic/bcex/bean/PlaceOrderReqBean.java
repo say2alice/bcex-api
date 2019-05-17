@@ -3,7 +3,7 @@ package kr.co.bic.bcex.bean;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-public class PlaceOrderReqBean extends BeanBasic implements BcexReqBeanInterface {
+public class PlaceOrderReqBean extends BeanBasic implements BcexSignedReqBeanInterface {
 	private String amount;
 	
 	private String api_key;

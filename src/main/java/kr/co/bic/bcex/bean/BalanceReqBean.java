@@ -5,7 +5,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-public class BalanceReqBean extends BeanBasic implements BcexReqBeanInterface {
+public class BalanceReqBean extends BeanBasic implements BcexSignedReqBeanInterface {
 	
 	private String api_key;
 	private String page;

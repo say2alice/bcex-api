@@ -24,7 +24,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import kr.co.bic.bcex.bean.BalanceReqBean;
-import kr.co.bic.bcex.bean.BcexReqBeanInterface;
+import kr.co.bic.bcex.bean.BcexSignedReqBeanInterface;
 
 @Component
 public class CryptoUtil {
@@ -84,7 +84,7 @@ public class CryptoUtil {
 		
 	}
 	
-	public String getEncryptMessage(BcexReqBeanInterface reqBean) {
+	public String getEncryptMessage(BcexSignedReqBeanInterface reqBean) {
 		String strMessage = null;
 		ObjectMapper mapper = new ObjectMapper();
 			try {

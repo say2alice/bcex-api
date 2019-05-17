@@ -23,6 +23,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
 import kr.co.bic.bcex.bean.BalanceReqBean;
+import kr.co.bic.bcex.bean.BcexSignedReqBeanInterface;
+import kr.co.bic.bcex.bean.CancelOrderReqBean;
+import kr.co.bic.bcex.bean.OrderListReqBean;
+import kr.co.bic.bcex.bean.OrderListResBean;
 import kr.co.bic.bcex.bean.PlaceOrderReqBean;
 import kr.co.bic.bcex.util.CryptoUtil;
 
@@ -125,20 +129,130 @@ public class BcexTradingService {
 		return balance;
 	}
 	
-	public void placeOrder( ) {
+	public void placeOrder(String price, String amount) {
 		PlaceOrderReqBean reqBean = new PlaceOrderReqBean();
 		reqBean.setApi_key(this.apiKey);
 		reqBean.setMarket_type("One");
-		reqBean.setAmount("10");
+		reqBean.setAmount(amount);
 		reqBean.setMarket("BTC");
 		reqBean.setToken("SEED");
 		reqBean.setType("2");
-		reqBean.setPrice("0.00000500");
+		reqBean.setPrice(price);
 		
 		reqBean.setSign(cryptoUtil.getEncryptMessage(reqBean));
-		System.out.println(reqBean.getSign());
-		System.out.println(reqBean.toJsonString());
+		
+		HttpHeaders requestHeaders = new HttpHeaders();
+		requestHeaders.setContentType(MediaType.APPLICATION_JSON);
+//		requestHeaders.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+		
+		URI bcexApiUri = UriComponentsBuilder.newInstance()
+				.scheme(apiScheme).host(apiHost).path(apiPath).path("placeOrder")
+				.build().toUri();
+		
+//		System.out.println(gson.toJson(reqBean));
+		
+		HttpEntity<String> requestEntity = new HttpEntity<String>(gson.toJson(reqBean), requestHeaders);
+		
+		RestTemplate restTemplate = new RestTemplate();
+		
+		ResponseEntity<String> responseEntity = restTemplate.exchange(
+				bcexApiUri,
+                HttpMethod.POST,
+                requestEntity,
+                String.class
+        );
+		
+		if(responseEntity.getStatusCodeValue() == HttpStatus.OK.value()) {
+//			System.out.println(responseEntity.getBody());
+//			JsonElement element = jsonParser.parse(responseEntity.getBody());
+//			
+//			JsonArray jsonArray = element.getAsJsonObject().get("data").getAsJsonObject().get("data").getAsJsonArray();
+//			for (JsonElement jsonElement : jsonArray) {
+//				balance[0] = Double.parseDouble(jsonElement.getAsJsonObject().get("usable").getAsString());
+//				balance[1] = Double.parseDouble(jsonElement.getAsJsonObject().get("total").getAsString());
+//			}
+			
+		}
 		
 		
+	}
+	
+	public OrderListResBean getOrders() {
+		OrderListReqBean reqBean = new OrderListReqBean();
+		ArrayList<String> status = new ArrayList<>();
+		status.add("1");
+		
+		reqBean.setApi_key(this.apiKey);
+		reqBean.setPage("1");
+		reqBean.setSize("100");
+		reqBean.setStatus(status);
+		
+		reqBean.setSign(cryptoUtil.getEncryptMessage(reqBean));
+
+		JsonElement element = requestAction("getOrders", reqBean);
+		
+		Gson gson = new Gson();
+		OrderListResBean resonse = gson.fromJson(element, OrderListResBean.class);
+		
+		
+//		JsonArray orderList = element.getAsJsonObject().get("data").getAsJsonArray();
+//		for (JsonElement jsonElement : orderList) {
+//				balance[0] = Double.parseDouble(jsonElement.getAsJsonObject().get("usable").getAsString());
+//				balance[1] = Double.parseDouble(jsonElement.getAsJsonObject().get("total").getAsString());
+//		}
+		
+		return resonse;
+
+	}
+	
+	public void cancelOrder(ArrayList<String> orderNumbers) {
+		String orderListJson = new Gson().toJson(orderNumbers);
+		CancelOrderReqBean reqBean = new CancelOrderReqBean();
+		reqBean.setApi_key(this.apiKey);
+		reqBean.setOrder_nos(orderListJson);
+		reqBean.setSign(cryptoUtil.getEncryptMessage(reqBean));
+		
+		requestAction("cancelOrder", reqBean);
+		
+	}
+	
+	private JsonElement requestAction(String strCMD, BcexSignedReqBeanInterface reqBean) {
+		HttpHeaders requestHeaders = new HttpHeaders();
+		requestHeaders.setContentType(MediaType.APPLICATION_JSON);
+		
+		JsonElement resopnseJsonElement = null;
+		
+		URI bcexApiUri = UriComponentsBuilder.newInstance()
+				.scheme(apiScheme).host(apiHost).path(apiPath).path(strCMD)
+				.build().toUri();
+		
+//		System.out.println(gson.toJson(reqBean));
+		
+		HttpEntity<String> requestEntity = new HttpEntity<String>(gson.toJson(reqBean), requestHeaders);
+		
+		RestTemplate restTemplate = new RestTemplate();
+		
+		ResponseEntity<String> responseEntity = restTemplate.exchange(
+				bcexApiUri,
+                HttpMethod.POST,
+                requestEntity,
+                String.class
+        );
+		
+		if (responseEntity.getStatusCodeValue() == HttpStatus.OK.value()) {
+			
+			JsonElement element = jsonParser.parse(responseEntity.getBody());
+			
+			int resCode = element.getAsJsonObject().get("code").getAsInt();
+			String resMsg = element.getAsJsonObject().get("msg").getAsString();
+			
+			if(resCode == 0) {
+				resopnseJsonElement = element.getAsJsonObject().get("data");
+			} else {
+				System.out.println(strCMD + " Error [" + resCode + "] --> " + resMsg);
+			}
+		}
+		
+		return resopnseJsonElement;
 	}
 }
